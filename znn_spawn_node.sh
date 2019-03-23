@@ -83,7 +83,7 @@ function configure_startup() {
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
 # Short-Description: $COIN_NAME
-# Description: This file starts and stops $COIN_NAME MN server
+# Description: This file starts and stops $COIN_NAME Node server
 #
 ### END INIT INFO
 case "\$1" in
@@ -134,7 +134,6 @@ addnode=seed-1.znn.space
 addnode=seed.zenon.foundation
 addnode=seed.zenon.one
 addnode=seed.znn.one
-port=$COIN_PORT
 EOF
 }
 
@@ -167,6 +166,7 @@ logtimestamps=1
 maxconnections=256
 bind=$NODEIP
 masternode=1
+externalip=$NODEIP
 externalip=$NODEIP:$COIN_PORT
 masternodeprivkey=$COINKEY
 EOF
@@ -255,29 +255,6 @@ function prepare_system() {
 	echo -e "Prepare the system to install ${GREEN}$COIN_NAME${NC} node. Installing additional packages."
 	apt-get update >/dev/null 2>&1
 	apt-get install unzip net-tools wget ufw sudo curl pkg-config
-	#DEBIAN_FRONTEND=noninteractive apt-get update > /dev/null 2>&1
-	#DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y -qq upgrade >/dev/null 2>&1
-	#apt install -y software-properties-common >/dev/null 2>&1
-	#echo -e "${GREEN}Adding bitcoin PPA repository"
-	#apt-add-repository -y ppa:bitcoin/bitcoin >/dev/null 2>&1
-	#echo -e "Installing required packages, it may take some time to finish.${NC}"
-	#apt-get update >/dev/null 2>&1
-	#apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" make software-properties-common \
-	#build-essential libtool autoconf libssl-dev libboost-dev libboost-chrono-dev libboost-filesystem-dev libboost-program-options-dev \
-	#libboost-system-dev libboost-test-dev libboost-thread-dev sudo automake git wget curl libdb4.8-dev bsdmainutils libdb4.8++-dev \
-	#libminiupnpc-dev libgmp3-dev ufw pkg-config libevent-dev>/dev/null 2>&1
-	#if [ "$?" -gt "0" ];
-	#  then
-	#	echo -e "${RED}Not all required packages were installed properly. Try to install them manually by running the following commands:${NC}\n"
-	#	echo "apt-get update"
-	#	echo "apt -y install software-properties-common"
-	#	echo "apt-add-repository -y ppa:bitcoin/bitcoin"
-	#	echo "apt-get update"
-	#	echo "apt install -y net-tools make build-essential libtool software-properties-common autoconf libssl-dev libboost-dev libboost-chrono-dev libboost-filesystem-dev \
-	#libboost-program-options-dev libboost-system-dev libboost-test-dev libboost-thread-dev sudo automake git curl libdb4.8-dev \
-	#bsdmainutils libdb4.8++-dev libminiupnpc-dev libgmp3-dev ufw fail2ban pkg-config libevent-dev"
-	# exit 1
-	#fi
 }
 
 
@@ -292,7 +269,7 @@ function important_information() {
    echo -e "Stop: ${RED}systemctl stop $COIN_NAME.service${NC}"
  fi
  echo -e "VPS_IP:PORT ${RED}$NODEIP:$COIN_PORT${NC}"
- echo -e "MASTERNODE PRIVATEKEY is: ${RED}$COINKEY${NC}"
+ echo -e "NODE PRIVKEY (masternodeprivkey) is ${RED}$COINKEY${NC}"
  if [[ -n $SENTINEL_REPO  ]]; then
   echo -e "${RED}Sentinel${NC} is installed in ${RED}$CONFIGFOLDER/sentinel${NC}"
   echo -e "Sentinel logs is: ${RED}$CONFIGFOLDER/sentinel.log${NC}"
@@ -331,5 +308,8 @@ checks
 prepare_system
 compile_node
 setup_node
-$COIN_DAEMON -daemon
-echo -e "Setup finished successfully. Node ready for remote activation. Start the node from Pillars tab in the wallet."
+if [[ -n "$(pgrep -x $COIN_DAEMON)" ]]; then
+	$COIN_DAEMON -daemon
+	exit 1
+fi
+echo -e "Setup finished successfully. Wait for the node to ${GREEN}fully sync${NC}. After that you can start it from ${GREEN}Pillars${NC} tab from the wallet."
