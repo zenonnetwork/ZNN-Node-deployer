@@ -4,8 +4,10 @@ Shell script to install a [ZNN Node] (https://zenon.network) on a Linux server r
 ***
 ## Installation:
 ```
-1) wget -q https://github.com/zenonnetwork/ZNN-Node-deployer/blob/master/znn_spawn_node.sh
-2) bash znn_spawn_node.sh
+1) apt-get update && apt-get install git
+2) git clone https://github.com/zenonnetwork/ZNN-Node-deployer.git
+3) chmod +x znn_spawn_node.sh
+4) ./znn_spawn_node.sh
 ```
 ***
 
