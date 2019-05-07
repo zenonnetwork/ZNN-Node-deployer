@@ -1,43 +1,40 @@
 # Zenon
-Shell script to install a [ZNN Node] (https://zenon.network) on a Linux server running Ubuntu 14.04/16.04/18.04 or Debian 9.5/9.8. Use it on your own risk.
+Shell script to install a [ZNN Node] (https://zenon.network) on a Linux server running Ubuntu 14.04/16.04/18.04 or Debian 9.5/9.8/9.9. Use it on your own risk.
 
 ***
 ## Installation:
 ```
 1) apt-get update && apt-get install git
 2) git clone https://github.com/zenonnetwork/ZNN-Node-deployer.git
-3) chmod +x znn_spawn_node.sh
-4) ./znn_spawn_node.sh
+3) cd ZNN-Node-deployer
+4) chmod +x znn_spawn_node.sh
+5) ./znn_spawn_node.sh
 ```
 ***
 
 ## Desktop wallet setup
 
-After the Node is up and running, you need to configure the desktop wallet accordingly. Here are the steps for a GUI (Windows/MacOS) wallet:
+After the Node is up and running, you need to configure the desktop wallet accordingly. Here are the steps for a GUI (Windows/MacOS/Linux) wallet:
 1. Open the Zenon Desktop Wallet.
-2. Go to RECEIVE and create a New Address: **Node1**
-3. Send **5000** **ZNN** to **Node1**.
+2. Go to Receiving Addresses and create a new address: **Node1**
+3. Send exactly **5000** **ZNN** to **Node1**.
 4. Wait for 6 confirmations.
-5. Go to **Tools -> "Debug console - Console"**
-6. Type the following command: **masternode outputs**
-7. Go to  ** Tools -> "Open Node Configuration File"
-8. Add the following entry:
+5. Enable Pillars tab if it's hidden: **Settings > Options > Wallet > Show Pillars Tab**
+6. Navigate to **Pillars tab** and click on **Get outputs** to get a list with all  **output TXs** and the corresponding **output IDs**.
+7. Click on **Config Node** and fill in the following entries:
 ```
-Alias Address Privkey TxHash Output_index
+Alias; VPS IP:port; Node Privkey; Output TX; Output ID
 ```
 * Alias: **Node1**
-* Address: **VPS_IP:PORT**
-* Privkey: **Masternode Private Key**
-* TxHash: **First value from Step 6**
-* Output index:  **Second value from Step 6**
-9. Save and close the file.
-10. Go to **Pillars Tab**. If you tab is not shown, please enable it from: **Settings - Options - Wallet - Show Pillars Tab**
-11. Click **Update status** to see your node. If it is not shown, close the wallet and start it again. Make sure the wallet is unlocked & fully sync'ed.
-12. Open **Debug Console** and type:
+* VPS IP:port: **IP:35993**
+* Node Privkey: **Press Autofill Privkey** or generate it manually from Debug Console using ```masternode genkey``` command
+* Output TX & ID: **Press Autofill OutputTX** or select them manually from Debug Console using  ```masternode outputs``` command
+8. Press OK and close the wallet. You can also double check masternode.conf from the wallet folder location.
+9. Reopen the wallet and wait to fully sync. Navigate to Pillars tab, select your Node and right click "Start Alias".
+10. Login into your VPS terminal and check if the Node is successfully running by issuing the following command:
 ```
-startmasternode "alias" "0" "Node1"
+/usr/local/bin/Zenon-cli masternode status
 ```
-***
 
 ## Usage:
 ```
@@ -46,9 +43,9 @@ Zenon-cli getinfo
 Zenon-cli masternode status
 ```
 
-Also, if you want to check/start/stop **Zenon** , run one of the following commands as **root**:
+Also, if you want to check/start/stop **Zenon**, run one of the following commands as **root**:
 
-**Ubuntu 16.04/18.04 Debian 9.5/9.8**:
+**Ubuntu 16.04/18.04 Debian 9.5/9.8/9.9**:
 ```
 systemctl status Zenon #To check the service is running.
 systemctl start Zenon #To start Zenon service.
@@ -61,5 +58,4 @@ systemctl is-enabled Zenon #To check whetether Zenon service is enabled on boot 
 /etc/init.d/Zenon stop #To stop Zenon service
 /etc/init.d/Zenon restart #To restart Zenon service
 ```
-
 ***
