@@ -25,7 +25,7 @@ function download_node() {
   wget -q $COIN_REPO
   COIN_ZIP=$(echo $COIN_REPO | awk -F'/' '{print $NF}')
   echo -e "Verifying SHA256 checksum"
-  echo "3a8a32f7d9b7f97b91f3a1c4b5f221697fc5ebf1b8ba2a0019af86454c11ca9c $COIN_ZIP" | sha256sum -c || exit 1
+  echo "b8a0082a7a4a61a2dd1ecd116a734ecac63942eab29701009307c73adbae18d4 $COIN_ZIP" | sha256sum -c || exit 1
   unzip $COIN_ZIP >/dev/null 2>&1
   cp Zenon* /usr/local/bin
   chmod +x $COIN_DAEMON
