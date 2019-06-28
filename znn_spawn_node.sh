@@ -25,7 +25,7 @@ echo -e "Downloading ${GREEN}$COIN_NAME${NC}. Please wait"
   wget -q $COIN_REPO
   COIN_ZIP=$(echo $COIN_REPO | awk -F'/' '{print $NF}')
   echo -e "Verifying SHA256 checksum"
-  echo "b8a0082a7a4a61a2dd1ecd116a734ecac63942eab29701009307c73adbae18d4 $COIN_ZIP" | sha256sum -c || exit 1
+  echo "8ffb03e5d7fb301a5ea678cf7312519339481b259d5bf1f14b409f760185bdc5 $COIN_ZIP" | sha256sum -c || exit 1
   unzip $COIN_ZIP >/dev/null 2>&1
   cp $COIN_NAME* /usr/local/bin
   chmod +x $COIN_NAME*
