@@ -93,6 +93,11 @@ addnode=seed-1.znn.space
 addnode=seed.zenon.foundation
 addnode=seed.zenon.one
 addnode=seed.znn.one
+addnode=alpha-1.zenon.network
+addnode=alpha-2.zenon.foundation
+addnode=alpha-3.zenon.one
+addnode=alpha-4.znn.one
+addnode=alpha-5.znn.space
 EOF
 }
 
@@ -251,7 +256,7 @@ if [[ -d "$CONFIGFOLDER" ]]; then
     else
         read -p "$COIN_NAME datadir folder found on system. Do you want to continue with the updating process? (Y/n)? " CONT
     fi
-    if [ "$CONT" = "Y" ]; then
+    if [ "$CONT" != "n" ]; then
             echo -e "Preparing to disable $COIN_NAME service"
             systemctl disable $COIN_NAME.service >/dev/null 2>&1
             sleep 10
