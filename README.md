@@ -1,5 +1,5 @@
 # Zenon
-Shell script to install a [ZNN Node] (https://zenon.network) on a Linux server running Ubuntu 14.04/16.04/18.04 or Debian 9.5/9.8/9.9. Use it on your own risk.
+Shell script to install a [ZNN Node] (https://zenon.network) on a Linux server running Ubuntu 16.04/18.04 or Debian 9.5/9.8/9.9. Use it on your own risk.
 
 ***
 ## Installation:
@@ -64,11 +64,5 @@ systemctl status Zenon #To check the service is running.
 systemctl start Zenon #To start Zenon service.
 systemctl stop Zenon #To stop Zenon service.
 systemctl is-enabled Zenon #To check whetether Zenon service is enabled on boot or not.
-```
-**Ubuntu 14.04**:  
-```
-/etc/init.d/Zenon start #To start Zenon service
-/etc/init.d/Zenon stop #To stop Zenon service
-/etc/init.d/Zenon restart #To restart Zenon service
 ```
 ***
