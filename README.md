@@ -6,15 +6,22 @@ Shell script to install a [ZNN Node] (https://zenon.network) on a Linux server r
 ```
 1) apt-get update && apt-get install git
 If you are installing the Node for the first time: 
+1.1) cd ~
 2.1) git clone https://github.com/zenonnetwork/ZNN-Node-deployer.git
 3.1) cd ZNN-Node-deployer
 
 If you want to update an existing Node: 
+2.1) cd ~
 2.2) cd ZNN-Node-deployer
 3.2) git reset --hard && git pull
 
 4) chmod +x znn_spawn_node.sh
 5) ./znn_spawn_node.sh
+
+If you get any errors:
+6) cd ~
+7) rm -rf ZNN-Node-deployer
+8) start again with step 1.1 and ignore steps 2.1, 2.2 and 3.2.
 ```
 ***
 
