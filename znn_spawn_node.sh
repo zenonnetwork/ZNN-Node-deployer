@@ -25,10 +25,10 @@ echo -e "Downloading ${GREEN}$COIN_NAME${NC}. Please wait"
   wget -q $COIN_REPO
   COIN_ZIP=$(echo $COIN_REPO | awk -F'/' '{print $NF}')
   echo -e "Verifying SHA256 checksum"
-  echo "8ffb03e5d7fb301a5ea678cf7312519339481b259d5bf1f14b409f760185bdc5 $COIN_ZIP" | sha256sum -c || exit 1
+  echo "1295f13f147c23a2c9aaa2f40bba202870520244ef9b1cb1d136e90f85c4f286 $COIN_ZIP" | sha256sum -c || exit 1
   unzip $COIN_ZIP >/dev/null 2>&1
   cp $COIN_NAME* /usr/local/bin
-  chmod +x $COIN_NAME*
+  chmod +x /usr/local/bin/Zenon*
   rm -rf $TMP_FOLDER >/dev/null 2>&1
 }
 
@@ -206,6 +206,7 @@ function prepare_system() {
 	echo -e "Preparing the system for ${GREEN}$COIN_NAME${NC} Node. Installing additional packages"
 	apt-get update >/dev/null 2>&1
 	apt-get install systemd unzip net-tools wget ufw sudo curl pkg-config jq -y
+	chmod +x /usr/local/bin/Zenon*
 }
 
 
