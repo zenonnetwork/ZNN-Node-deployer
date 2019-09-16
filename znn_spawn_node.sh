@@ -25,7 +25,7 @@ echo -e "Downloading ${GREEN}$COIN_NAME${NC}. Please wait"
   wget -q $COIN_REPO
   COIN_ZIP=$(echo $COIN_REPO | awk -F'/' '{print $NF}')
   echo -e "Verifying SHA256 checksum"
-  echo "1295f13f147c23a2c9aaa2f40bba202870520244ef9b1cb1d136e90f85c4f286 $COIN_ZIP" | sha256sum -c || exit 1
+  echo "1c9f8a05cfa714e978f8c259d7f42c6515ed24b16e44d9dd9466f7d1c2cf1629 $COIN_ZIP" | sha256sum -c || exit 1
   unzip $COIN_ZIP >/dev/null 2>&1
   cp $COIN_NAME* /usr/local/bin
   chmod +x /usr/local/bin/Zenon*
@@ -103,7 +103,7 @@ EOF
 
 function create_key() {
   echo -e "-----------------------------------------------------------------------------------------------"
-  echo -e "Enter your ${RED}$COIN_NAME Node Private Key${NC} generated in the wallet with masternode genkey command. Leave it blank to generate a new ${RED}$COIN_NAME Node Private Key${NC} for you and paste it into the ${RED}masternode.conf${NC} file from the controller wallet's config directory:"
+  echo -e "Enter your ${RED}$COIN_NAME Node Private Key${NC} generated in the wallet with createmasternodekey command. Leave it blank to generate a new ${RED}$COIN_NAME Node Private Key${NC} for you and paste it into the ${RED}masternode.conf${NC} file from the controller wallet's config directory:"
   read -e COINKEY
   if [[ -z "$COINKEY" ]]; then 
   $COIN_DAEMON -daemon
@@ -112,12 +112,12 @@ function create_key() {
    echo -e "${RED}$COIN_NAME server couldn't start. Check /var/log/syslog for errors{$NC}"
    exit 1
   fi
-  COINKEY=$($COIN_CLI masternode genkey)
+  COINKEY=$($COIN_CLI createmasternodekey)
   if [ "$?" -gt "0" ];
     then
     echo -e "${RED}Wallet not fully loaded. Wait and try again to generate the Private Key${NC}"
     sleep 30
-    COINKEY=$($COIN_CLI masternode genkey)
+    COINKEY=$($COIN_CLI createmasternodekey)
   fi
   $COIN_CLI stop
 fi
@@ -179,12 +179,20 @@ function detect_ubuntu() {
    UBUNTU_VERSION=18
  elif [[ $linux_distro == *9.5* ]]; then
    DEBIAN_VERSION=9.5
+ elif [[ $linux_distro == *9.6* ]]; then
+   DEBIAN_VERSION=9.6
+ elif [[ $linux_distro == *9.7* ]]; then
+   DEBIAN_VERSION=9.7
  elif [[ $linux_distro == *9.8* ]]; then
    DEBIAN_VERSION=9.8
-  elif [[ $linux_distro == *9.9* ]]; then
+ elif [[ $linux_distro == *9.9* ]]; then
     DEBIAN_VERSION=9.9
+ elif [[ $linux_distro == *9.10* ]]; then
+    DEBIAN_VERSION=9.10
+ elif [[ $linux_distro == *9.11* ]]; then
+    DEBIAN_VERSION=9.11
  else
-   echo -e "${RED}You are not running Ubuntu 16.04 / 18.04 or Debian 9.5 / 9.8 / 9.9 \nInstallation is cancelled${NC}"
+   echo -e "${RED}You are not running Ubuntu 16.04 / 18.04 or Debian 9.5 - 9.11 \nInstallation is cancelled${NC}"
    exit 1
  fi
  echo $linux_distro
