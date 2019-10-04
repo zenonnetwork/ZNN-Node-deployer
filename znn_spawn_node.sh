@@ -14,6 +14,7 @@ NODEIP=$(curl -s4 api.ipify.org)
 
 
 RED='\033[0;31m'
+PURPLE='\033[0;35m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
@@ -56,17 +57,17 @@ WantedBy=multi-user.target
 EOF
 
   sleep 1
-  echo -e "Reloading ${RED}$systemd${NC} daemon"
+  echo -e "Reloading ${PURPLE}$systemd${NC} daemon"
   systemctl daemon-reload
   sleep 5
-  echo -e "Starting ${RED}$COIN_NAME${NC} daemon"
+  echo -e "Starting ${PURPLE}$COIN_NAME${NC} daemon"
   systemctl start $COIN_NAME.service
   sleep 1
-  echo -e "Enabling ${RED}$COIN_NAME${NC} service"
+  echo -e "Enabling ${PURPLE}$COIN_NAME${NC} service"
   systemctl enable $COIN_NAME.service >/dev/null 2>&1
 
   if ! pgrep -x Zenond; then
-    echo -e "${RED}$COIN_NAME is not running${NC}, please investigate. You should start by running the following commands as root:"
+    echo -e "${PURPLE}$COIN_NAME is not running${NC}, please investigate. You should start by running the following commands as root:"
     echo -e "${GREEN}systemctl start $COIN_NAME.service"
     echo -e "systemctl status $COIN_NAME.service"
     echo -e "less /var/log/syslog${NC}"
@@ -103,19 +104,19 @@ EOF
 
 function create_key() {
   echo -e "-----------------------------------------------------------------------------------------------"
-  echo -e "Enter your ${RED}$COIN_NAME Node Private Key${NC} generated in the wallet with createmasternodekey command. Leave it blank to generate a new ${RED}$COIN_NAME Node Private Key${NC} for you and paste it into the ${RED}masternode.conf${NC} file from the controller wallet's config directory:"
+  echo -e "Enter your ${PURPLE}$COIN_NAME Node Private Key${NC} generated in the wallet with createmasternodekey command. Leave it blank to generate a new ${PURPLE}$COIN_NAME Node Private Key${NC} for you and paste it into the ${PURPLE}masternode.conf${NC} file from the controller wallet's config directory:"
   read -e COINKEY
   if [[ -z "$COINKEY" ]]; then 
   $COIN_DAEMON -daemon
   sleep 30
   if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
-   echo -e "${RED}$COIN_NAME server couldn't start. Check /var/log/syslog for errors{$NC}"
+   echo -e "${PURPLE}$COIN_NAME server couldn't start. Check /var/log/syslog for errors{$NC}"
    exit 1
   fi
   COINKEY=$($COIN_CLI createmasternodekey)
   if [ "$?" -gt "0" ];
     then
-    echo -e "${RED}Wallet not fully loaded. Wait and try again to generate the Private Key${NC}"
+    echo -e "${PURPLE}Wallet not fully loaded. Wait and try again to generate the Private Key${NC}"
     sleep 30
     COINKEY=$($COIN_CLI createmasternodekey)
   fi
@@ -202,7 +203,7 @@ function detect_ubuntu() {
 function checks() {
  detect_ubuntu
 if [[ $EUID -ne 0 ]]; then
-   echo -e "${RED}$0 must be run as root.${NC}"
+   echo -e "${PURPLE}$0 must be run as root.${NC}"
    exit 1
 fi
     echo -e "Finishing checks"
@@ -219,17 +220,17 @@ function prepare_system() {
 
 
 function important_information() {
- echo -e "$COIN_NAME Node is up and running listening on port ${RED}$COIN_PORT${NC}"
- echo -e "Configuration file is: ${RED}$CONFIGFOLDER/$CONFIG_FILE${NC}"
- echo -e "Start: ${RED}systemctl start $COIN_NAME.service${NC}"
- echo -e "Stop: ${RED}systemctl stop $COIN_NAME.service${NC}"
- echo -e "VPS_IP:PORT ${RED}$NODEIP:$COIN_PORT${NC}"
- echo -e "NODE PRIVKEY (masternodeprivkey) is ${RED}$COINKEY${NC}"
+ echo -e "$COIN_NAME Node is up and running listening on port ${PURPLE}$COIN_PORT${NC}"
+ echo -e "Configuration file is: ${PURPLE}$CONFIGFOLDER/$CONFIG_FILE${NC}"
+ echo -e "Start: ${PURPLE}systemctl start $COIN_NAME.service${NC}"
+ echo -e "Stop: ${PURPLE}systemctl stop $COIN_NAME.service${NC}"
+ echo -e "VPS_IP:PORT ${PURPLE}$NODEIP:$COIN_PORT${NC}"
+ echo -e "NODE PRIVKEY (masternodeprivkey) is ${PURPLE}$COINKEY${NC}"
  if [[ -n $SENTINEL_REPO  ]]; then
-  echo -e "${RED}Sentinel${NC} is installed in ${RED}$CONFIGFOLDER/sentinel${NC}"
-  echo -e "Sentinel logs is: ${RED}$CONFIGFOLDER/sentinel.log${NC}"
+  echo -e "${PURPLE}Sentinel${NC} is installed in ${PURPLE}$CONFIGFOLDER/sentinel${NC}"
+  echo -e "Sentinel logs is: ${PURPLE}$CONFIGFOLDER/sentinel.log${NC}"
  fi
- echo -e "Check if $COIN_NAME is running by using the following command: ${RED}ps -ef | grep $COIN_DAEMON | grep -v grep${NC}"
+ echo -e "Check if $COIN_NAME is running by using the following command: ${PURPLE}ps -ef | grep $COIN_DAEMON | grep -v grep${NC}"
  echo -e "-----------------------------------------------------------------------------------------------"
 }
 
