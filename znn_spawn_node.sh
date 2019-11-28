@@ -1,6 +1,7 @@
 #!/bin/bash
 
 TMP_FOLDER=$(mktemp -d)
+TMP_FILE=$(mktemp)
 CONFIG_FILE='Zenon.conf'
 CONFIGFOLDER='/root/.Zenon'
 COIN_DAEMON='/usr/local/bin/Zenond'
@@ -19,13 +20,14 @@ NC='\033[0m'
 
 
 function download_node() {
+  echo -e "\n"
   echo -e "-----------------------------------------------------------------------------------------------"
   cd $TMP_FOLDER
 echo -e "Downloading ${GREEN}$COIN_NAME${NC}. Please wait"
   wget -q $COIN_REPO
   COIN_ZIP=$(echo $COIN_REPO | awk -F'/' '{print $NF}')
   echo -e "Verifying SHA256 checksum"
-  echo "1c9f8a05cfa714e978f8c259d7f42c6515ed24b16e44d9dd9466f7d1c2cf1629 $COIN_ZIP" | sha256sum -c || exit 1
+  echo "85ec7b20485bbe87bfda6301ef3517c1b9790cda748ca4cf880df0044166cb3b $COIN_ZIP" | sha256sum -c || exit 1
   unzip $COIN_ZIP >/dev/null 2>&1
   cp $COIN_NAME* /usr/local/bin
   chmod +x /usr/local/bin/Zenon*
@@ -59,10 +61,10 @@ EOF
   echo -e "Reloading ${RED}$systemd${NC} daemon"
   systemctl daemon-reload
   sleep 5
-  echo -e "Starting ${RED}$COIN_NAME${NC} daemon"
+  echo -e "Starting ${GREEN}$COIN_NAME${NC} daemon"
   systemctl start $COIN_NAME.service
   sleep 1
-  echo -e "Enabling ${RED}$COIN_NAME${NC} service"
+  echo -e "Enabling ${GREEN}$COIN_NAME${NC} service"
   systemctl enable $COIN_NAME.service >/dev/null 2>&1
 
   if ! pgrep -x Zenond; then
@@ -103,19 +105,19 @@ EOF
 
 function create_key() {
   echo -e "-----------------------------------------------------------------------------------------------"
-  echo -e "Enter your ${RED}$COIN_NAME Node Private Key${NC} generated in the wallet with createmasternodekey command. Leave it blank to generate a new ${RED}$COIN_NAME Node Private Key${NC} for you and paste it into the ${RED}masternode.conf${NC} file from the controller wallet's config directory:"
+  echo -e "Enter your ${GREEN}$COIN_NAME $(cat $TMP_FILE) Private Key${NC} generated in the wallet with ${GREEN}createmasternodekey${NC} command. Leave it blank to generate a new ${GREEN}$COIN_NAME $(cat $TMP_FILE) Private Key${NC} for you and paste it into the ${GREEN}masternode.conf${NC} file from the controller wallet's config directory:"
   read -e COINKEY
   if [[ -z "$COINKEY" ]]; then 
   $COIN_DAEMON -daemon
   sleep 30
   if [ -z "$(ps axo cmd:100 | grep $COIN_DAEMON)" ]; then
-   echo -e "${RED}$COIN_NAME server couldn't start. Check /var/log/syslog for errors{$NC}"
+   echo -e "${RED}$COIN_NAME server couldn't start.{$NC} Check /var/log/syslog for errors"
    exit 1
   fi
   COINKEY=$($COIN_CLI createmasternodekey)
   if [ "$?" -gt "0" ];
     then
-    echo -e "${RED}Wallet not fully loaded. Wait and try again to generate the Private Key${NC}"
+    echo -e "${RED}Wallet not fully loaded.${NC} Please wait"
     sleep 30
     COINKEY=$($COIN_CLI createmasternodekey)
   fi
@@ -211,25 +213,30 @@ fi
 
 function prepare_system() {
 	echo -e "-----------------------------------------------------------------------------------------------"
-	echo -e "Preparing the system for ${GREEN}$COIN_NAME${NC} Node. Installing additional packages"
+	echo -e "Preparing the system for ${GREEN}$COIN_NAME deployer${NC}. Installing additional packages. Please wait"
 	apt-get update >/dev/null 2>&1
 	apt-get install systemd unzip net-tools wget ufw sudo curl pkg-config jq -y
-	chmod +x /usr/local/bin/Zenon*
+	if [[ ! -f $COIN_DAEMON && -x $COIN_DAEMON ]]; then
+		chmod +x $COIN_DAEMON
+	fi
+	if [[ ! -f $COIN_CLI && -x $COIN_CLI ]]; then
+		chmod +x $COIN_CLI
+	fi
 }
 
 
 function important_information() {
- echo -e "$COIN_NAME Node is up and running listening on port ${RED}$COIN_PORT${NC}"
- echo -e "Configuration file is: ${RED}$CONFIGFOLDER/$CONFIG_FILE${NC}"
+ echo -e "$COIN_NAME $(cat $TMP_FILE) is up and running listening on port ${RED}$COIN_PORT${NC}"
+ echo -e "Configuration file: ${RED}$CONFIGFOLDER/$CONFIG_FILE${NC}"
  echo -e "Start: ${RED}systemctl start $COIN_NAME.service${NC}"
  echo -e "Stop: ${RED}systemctl stop $COIN_NAME.service${NC}"
- echo -e "VPS_IP:PORT ${RED}$NODEIP:$COIN_PORT${NC}"
- echo -e "NODE PRIVKEY (masternodeprivkey) is ${RED}$COINKEY${NC}"
+ echo -e "VPS IP and port: ${RED}$NODEIP:$COIN_PORT${NC}"
+ echo -e "$(cat $TMP_FILE) private key: ${RED}$COINKEY${NC}"
  if [[ -n $SENTINEL_REPO  ]]; then
   echo -e "${RED}Sentinel${NC} is installed in ${RED}$CONFIGFOLDER/sentinel${NC}"
   echo -e "Sentinel logs is: ${RED}$CONFIGFOLDER/sentinel.log${NC}"
  fi
- echo -e "Check if $COIN_NAME is running by using the following command: ${RED}ps -ef | grep $COIN_DAEMON | grep -v grep${NC}"
+ echo -e "Check if $COIN_NAME $(cat $TMP_FILE) is running by using the following command: ${RED}ps -ef | grep $COIN_DAEMON | grep -v grep${NC}"
  echo -e "-----------------------------------------------------------------------------------------------"
 }
 
@@ -241,6 +248,29 @@ function setup_node() {
   enable_firewall
   important_information
   configure_systemd
+}
+
+function node_type_selection () {
+  echo -e "Press 1 to setup a ${GREEN}Pillar${NC}"
+  echo -e "Press 2 to setup a ${GREEN}Node${NC}"
+  echo -e "Press X to ${RED}exit${NC} the setup"
+  read -n 1 -p "Input Selection: " node_type_selection
+  if [ "$node_type_selection" = "1" ]; then
+			echo "Pillar" > "$TMP_FILE"
+        elif [ "$node_type_selection" = "2" ]; then
+            echo "Node" > "$TMP_FILE"
+        elif [ "$node_type_selection" = "X" ];then
+			clear
+            exit 1
+        else
+			echo -e "   "
+            echo -e "You have entered an invalid selection. Please retry."
+            echo -e "Press any key to continue..."
+			echo -e "   "
+            read -n 1
+            clear
+            node_type_selection
+        fi
 }
 
 ##### Main #####
@@ -266,16 +296,16 @@ if [[ -d "$CONFIGFOLDER" ]]; then
         read -p "$COIN_NAME datadir folder found on system. Do you want to continue with the updating process? (Y/n)? " CONT
     fi
     if [ "$CONT" != "n" ]; then
-            echo -e "Preparing to disable $COIN_NAME service"
+            echo -e "Preparing to ${RED}disable${NC} ${GREEN}$COIN_NAME${NC} service"
             systemctl disable $COIN_NAME.service >/dev/null 2>&1
             sleep 10
-            echo -e "Preparing to stop $COIN_NAME Node"
+            echo -e "Preparing to ${RED}stop${NC} ${GREEN}$COIN_NAME${NC} service"
             systemctl stop $COIN_NAME.service >/dev/null 2>&1
             $COIN_CLI stop >/dev/null 2>&1
             sleep 10
-            echo -e "Preparing to delete old $COIN_NAME Node version"
+            echo -e "Preparing to ${RED}delete${NC} old ${GREEN}$COIN_NAME${NC} version"
             rm -rf /usr/local/bin/$COIN_NAME*
-            echo -e "Preparing to download new $COIN_NAME Node version"
+            echo -e "Preparing to download new ${GREEN}$COIN_NAME${NC} version"
             download_node
             sleep 1
             $COIN_DAEMON -resync -daemon
@@ -283,18 +313,22 @@ if [[ -d "$CONFIGFOLDER" ]]; then
             sleep 5
             echo -e "Preparing to re-enable $COIN_NAME service"
             systemctl enable $COIN_NAME.service >/dev/null 2>&1
-            echo -e "Node updated successfully to $new_version. Wait for the Node to ${GREEN}fully sync${NC}. After that you can restart it from ${GREEN}Pillars${NC} tab from the wallet"
+            echo -e "Updated successfully to $new_version. Wait for a ${GREEN}full sync${NC}. After that you can restart it from ${GREEN}Pillars${NC} tab from the wallet"
     else
         exit
     fi
 else
-    echo -e "Preparing to install $COIN_NAME Node"
+    echo -e "Preparing to install ${GREEN}$COIN_NAME${NC}"
+    node_type_selection
     download_node
     setup_node
     sleep 3
     if ! pgrep -x Zenond; then
-        echo -e "$COIN_NAME Node not running, restarting daemon"
+        echo -e "$COIN_NAME $(cat $TMP_FILE) not running, restarting daemon"
         $COIN_DAEMON -resync -daemon
     fi
-    echo -e "Setup finished successfully. Wait for the Node to ${GREEN}fully sync${NC}. After that you can start it from ${GREEN}Pillars${NC} tab from the wallet"
+    echo -e "Setup finished successfully. Wait for the $(cat $TMP_FILE) to ${GREEN}fully sync${NC}. After that you can start it from ${GREEN}Pillars${NC} tab from the wallet"
+    if [[ -e "$TMP_FILE" ]]; then
+        rm $TMP_FILE >/dev/null 2>&1
+    fi
 fi
