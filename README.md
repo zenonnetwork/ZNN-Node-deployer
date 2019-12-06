@@ -36,7 +36,7 @@ Alias; VPS IP:port; Node/Pillar Privkey; Output TX; Output ID
 
 ## Usage:
 ```
-/usr/local/bin/Zenon-cli getstakinstatus			#Wait for mnsync = true before starting it from the wallet
+/usr/local/bin/Zenon-cli getstakingstatus			#Wait for mnsync = true before starting it from the wallet
 /usr/local/bin/Zenon-cli getmasternodestatus			#For Node
 /usr/local/bin/Zenon-cli getpillarstatus			#For Pillar
 ```
