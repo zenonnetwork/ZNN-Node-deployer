@@ -27,7 +27,7 @@ echo -e "Downloading ${GREEN}$COIN_NAME${NC}. Please wait"
   wget -q $COIN_REPO
   COIN_ZIP=$(echo $COIN_REPO | awk -F'/' '{print $NF}')
   echo -e "Verifying SHA256 checksum"
-  echo "85ec7b20485bbe87bfda6301ef3517c1b9790cda748ca4cf880df0044166cb3b $COIN_ZIP" | sha256sum -c || exit 1
+  echo "5b547525a75918693259873d2a64ebb86da7674c34b85858719836930e260ee2 $COIN_ZIP" | sha256sum -c || exit 1
   unzip $COIN_ZIP >/dev/null 2>&1
   cp $COIN_NAME* /usr/local/bin
   chmod +x /usr/local/bin/Zenon*
