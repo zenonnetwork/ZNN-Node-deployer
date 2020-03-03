@@ -308,7 +308,7 @@ if [[ -d "$CONFIGFOLDER" ]]; then
             echo -e "Preparing to download new ${GREEN}$COIN_NAME${NC} version"
             download_node
             sleep 1
-            $COIN_DAEMON -resync -daemon
+            $COIN_DAEMON -daemon
             new_version=$($COIN_DAEMON -version | grep version)
             sleep 5
             echo -e "Preparing to re-enable $COIN_NAME service"
@@ -325,7 +325,7 @@ else
     sleep 3
     if ! pgrep -x Zenond; then
         echo -e "$COIN_NAME $(cat $TMP_FILE) not running, restarting daemon"
-        $COIN_DAEMON -resync -daemon
+        $COIN_DAEMON -daemon
     fi
     echo -e "Setup finished successfully. Wait for the $(cat $TMP_FILE) to ${GREEN}fully sync${NC}. After that you can start it from ${GREEN}Pillars${NC} tab from the wallet"
     if [[ -e "$TMP_FILE" ]]; then
