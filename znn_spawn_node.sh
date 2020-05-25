@@ -23,11 +23,11 @@ function download_node() {
   echo -e "\n"
   echo -e "-----------------------------------------------------------------------------------------------"
   cd $TMP_FOLDER
-echo -e "Downloading ${GREEN}$COIN_NAME${NC}. Please wait"
+  echo -e "Downloading ${GREEN}$COIN_NAME${NC}. Please wait"
   wget -q $COIN_REPO
   COIN_ZIP=$(echo $COIN_REPO | awk -F'/' '{print $NF}')
   echo -e "Verifying SHA256 checksum"
-  echo "2a3dc355924ec28ca25cf1ad98442b6fad1dd4ba3b1404a9358b938f2fa95f14 $COIN_ZIP" | sha256sum -c || exit 1
+  echo "24d9add9791fae3c5f17e58187d1503c79bfb6cfe2f4fb4b1ab85966cedaad1b $COIN_ZIP" | sha256sum -c || exit 1
   unzip $COIN_ZIP >/dev/null 2>&1
   cp $COIN_NAME* /usr/local/bin
   chmod +x /usr/local/bin/Zenon*
@@ -214,8 +214,8 @@ fi
 function prepare_system() {
 	echo -e "-----------------------------------------------------------------------------------------------"
 	echo -e "Preparing the system for ${GREEN}$COIN_NAME deployer${NC}. Installing additional packages. Please wait"
-	apt-get update >/dev/null 2>&1
-	apt-get install systemd unzip net-tools wget ufw sudo curl pkg-config jq -y
+	apt-get update -y >/dev/null 2>&1
+	apt-get install systemd unzip net-tools wget ufw sudo curl pkg-config jq -y >/dev/null 2>&1
 	if [[ ! -f $COIN_DAEMON && -x $COIN_DAEMON ]]; then
 		chmod +x $COIN_DAEMON
 	fi
@@ -250,11 +250,28 @@ function setup_node() {
   configure_systemd
 }
 
+function setup_ntp() {
+  echo -e "Setting up NTP"
+  apt-get purge ntp -y >/dev/null 2>&1
+
+  if [[ ! -e "/etc/systemd/timesyncd.conf" ]]; then
+    cat << EOF > /etc/systemd/timesyncd.conf
+[Time]
+NTP=time.cloudflare.com
+EOF
+  elif ! grep -q "time.cloudflare.com" "/etc/systemd/timesyncd.conf"; then
+    echo -e "\nNTP=time.cloudflare.com\n" >> /etc/systemd/timesyncd.conf
+  fi
+
+  systemctl restart systemd-timesyncd.service >/dev/null 2>&1
+  timedatectl set-ntp true >/dev/null 2>&1
+}
+
 function node_type_selection () {
   echo -e "Press 1 to setup a ${GREEN}Pillar${NC}"
   echo -e "Press 2 to setup a ${GREEN}Node${NC}"
   echo -e "Press X to ${RED}exit${NC} the setup"
-  read -n 1 -p "Input Selection: " node_type_selection
+  read -n 1 -p "Input Selection (Do not press Enter after pressing 1 or 2): " node_type_selection
   if [ "$node_type_selection" = "1" ]; then
 			echo "Pillar" > "$TMP_FILE"
         elif [ "$node_type_selection" = "2" ]; then
@@ -313,6 +330,7 @@ if [[ -d "$CONFIGFOLDER" ]]; then
             sleep 5
             echo -e "Preparing to re-enable $COIN_NAME service"
             systemctl enable $COIN_NAME.service >/dev/null 2>&1
+            setup_ntp
             echo -e "Updated successfully to $new_version. Wait for a ${GREEN}full sync${NC}. After that you can restart it from ${GREEN}Pillars${NC} tab from the wallet"
     else
         exit
@@ -322,6 +340,7 @@ else
     node_type_selection
     download_node
     setup_node
+    setup_ntp
     sleep 3
     if ! pgrep -x Zenond; then
         echo -e "$COIN_NAME $(cat $TMP_FILE) not running, restarting daemon"
